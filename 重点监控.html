@@ -15,9 +15,23 @@
             background-color: #f0f0f0;
             padding: 20px;
         }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 20vw;
+            color: rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            font-weight: bold;
+        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         .header {
             text-align: center;
@@ -94,8 +108,9 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>重点监控</h1>
+            <h1>异动监控</h1>
         </div>
+        <div class="watermark">山顶量化</div>
 
         <div class="section">
             <table id="today-table">
