@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重点监控</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            display: inline-block;
+            border: 1px solid #333;
+            padding: 8px 30px;
+            font-size: 18px;
+            font-weight: normal;
+            background-color: #fff;
+        }
+        .section {
+            margin-bottom: 20px;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .section-title {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            min-height: 150px;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f8f8f8;
+            font-weight: normal;
+            color: #333;
+        }
+        td {
+            color: #666;
+        }
+        tr:hover td {
+            background-color: #f0f8ff;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #e74c3c;
+        }
+        .update-time {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        a {
+            color: #1890ff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>重点监控</h1>
+        </div>
+
+        <div class="section">
+            <table id="today-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">股票代码</th>
+                        <th style="width: 25%;">股票名称</th>
+                        <th style="width: 20%;">监控开始日期</th>
+                        <th style="width: 20%;">监控结束日期</th>
+                        <th style="width: 20%;">类型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">历史监管</div>
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">股票代码</th>
+                        <th style="width: 25%;">股票名称</th>
+                        <th style="width: 20%;">监控开始日期</th>
+                        <th style="width: 20%;">监控结束日期</th>
+                        <th style="width: 20%;">类型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">问询函件</div>
+            <table id="letter-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">股票代码</th>
+                        <th style="width: 25%;">股票名称</th>
+                        <th style="width: 15%;">函件类型</th>
+                        <th style="width: 20%;">日期</th>
+                        <th style="width: 25%;">文件</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="update-time" id="update-time"></div>
+    </div>
+
+    <script>
+        const DATA_URL = 'https://raw.githubusercontent.com/GeFengJue/zdjk-monitor/main/data/zdjk_data.json';
+
+        // 获取类型名称
+        function getTypeName(type) {
+            const typeMap = {
+                1: '重点监控',
+                2: '严重异常',
+                3: '风险提示'
+            };
+            return typeMap[type] || type;
+        }
+
+        // 获取函件类型名称
+        function getLetterType(type) {
+            const typeMap = {
+                1: '问询函',
+                2: '关注函',
+                3: '监管函'
+            };
+            return typeMap[type] || type;
+        }
+
+        // 填充表格
+        function fillTable(tableId, data, columns) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="color: #999;">暂无数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => {
+                const cells = columns.map(col => {
+                    if (col.format) {
+                        return `<td>${col.format(item[col.index])}</td>`;
+                    }
+                    return `<td>${item[col.index] || '-'}</td>`;
+                }).join('');
+                return `<tr>${cells}</tr>`;
+            }).join('');
+        }
+
+        // 加载数据
+        async function loadData() {
+            try {
+                const response = await fetch(DATA_URL + '?t=' + Date.now());
+                if (!response.ok) throw new Error('加载失败');
+                const data = await response.json();
+
+                // 填充重点监控(今日)
+                fillTable('today-table', data.ZDJK_Today?.List || [], [
+                    { index: 0 },
+                    { index: 1 },
+                    { index: 2 },
+                    { index: 3 },
+                    { index: 4, format: v => getTypeName(v) }
+                ]);
+
+                // 填充历史监管
+                fillTable('history-table', data.ZDJK_His?.List || [], [
+                    { index: 0 },
+                    { index: 1 },
+                    { index: 2 },
+                    { index: 3 },
+                    { index: 4, format: v => getTypeName(v) }
+                ]);
+
+                // 填充问询函件
+                fillTable('letter-table', data.WXHJ_His?.List || [], [
+                    { index: 0 },
+                    { index: 1 },
+                    { index: 4, format: v => getLetterType(v) },
+                    { index: 2 },
+                    { index: 3, format: v => `<a href="${v}" target="_blank">查看文件</a>` }
+                ]);
+
+                // 更新时间
+                const updateTime = document.getElementById('update-time');
+                if (data.fetch_time) {
+                    const date = new Date(data.fetch_time);
+                    updateTime.textContent = `更新时间: ${date.toLocaleString('zh-CN')}`;
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.querySelectorAll('tbody').forEach(tbody => {
+                    tbody.innerHTML = '<tr><td colspan="5" class="error">数据加载失败，请稍后重试</td></tr>';
+                });
+            }
+        }
+
+        // 页面加载时获取数据
+        loadData();
+
+        // 每5分钟自动刷新
+        setInterval(loadData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
