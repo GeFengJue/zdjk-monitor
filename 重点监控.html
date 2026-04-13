@@ -169,7 +169,9 @@
     </div>
 
     <script>
-        const DATA_URL = 'https://raw.githubusercontent.com/GeFengJue/zdjk-monitor/main/data/zdjk_data.json';
+        // 使用CDN代理加速GitHub raw访问
+        const RAW_URL = 'https://raw.githubusercontent.com/GeFengJue/zdjk-monitor/main/data/zdjk_data.json';
+        const DATA_URL = `https://corsproxy.io/?${encodeURIComponent(RAW_URL)}`;
 
         // 获取类型名称
         function getTypeName(type) {
