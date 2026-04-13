@@ -14,28 +14,32 @@ from datetime import datetime
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 
-def get_device_id():
-    """获取设备ID"""
-    return "A7POKCVREKRh6OhXQj0w8e"
+# 认证信息
+DEVICE_ID = "ffffffff-ff48-ff8d-9bff-70bab682ffff"
+USER_ID = "0"
+VERSION = "5.17.0.0"
 
-def get_user_id():
-    """获取用户ID"""
-    return "55818188"
+headers = {
+    "Accept": "text/html, application/xhtml+xml, */*",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "User-Agent": "Opera/11.11 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/337.3",
+}
 
 def fetch_zdjk_today():
     """获取重点监控今日"""
-    url = "http://apphq.longhuvip.com/w内在逻辑/DTP_ZDJK_Today"
-    params = {
-        "device_id": get_device_id(),
-        "user_id": get_user_id()
-    }
-    headers = {
-        "Accept": "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    url = "https://apphq.longhuvip.com/w1/api/index.php"
+    payload = {
+        "a": "GetYDTP_ZDJK_Today",
+        "apiv": "w38",
+        "c": "StockBidYiDong",
+        "PhoneOSNew": "1",
+        "UserID": USER_ID,
+        "DeviceID": DEVICE_ID,
+        "VerSion": VERSION,
+        "Token": "0"
     }
     try:
-        response = requests.get(url, params=params, headers=headers, timeout=30)
+        response = requests.post(url, data=payload, headers=headers, verify=False, timeout=30)
         response.raise_for_status()
         return response.json()
     except Exception as e:
@@ -44,19 +48,20 @@ def fetch_zdjk_today():
 
 def fetch_zdjk_his():
     """获取重点监控历史"""
-    url = "http://apphq.longhuvip.com/w内在逻辑/DTP_ZDJK_His"
-    params = {
-        "device_id": get_device_id(),
-        "user_id": get_user_id(),
+    url = "https://apphq.longhuvip.com/w1/api/index.php"
+    payload = {
+        "a": "GetYDTP_ZDJK_His",
+        "apiv": "w38",
+        "c": "StockBidYiDong",
+        "PhoneOSNew": "1",
+        "UserID": USER_ID,
+        "DeviceID": DEVICE_ID,
+        "VerSion": VERSION,
+        "Token": "0",
         "days": 30
     }
-    headers = {
-        "Accept": "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-    }
     try:
-        response = requests.get(url, params=params, headers=headers, timeout=30)
+        response = requests.post(url, data=payload, headers=headers, verify=False, timeout=30)
         response.raise_for_status()
         return response.json()
     except Exception as e:
@@ -65,19 +70,20 @@ def fetch_zdjk_his():
 
 def fetch_wxhjj_his():
     """获取风险揭示函历史"""
-    url = "http://apphq.longhuvip.com/w内在逻辑/DTP_WXHJ_His"
-    params = {
-        "device_id": get_device_id(),
-        "user_id": get_user_id(),
+    url = "https://apphq.longhuvip.com/w1/api/index.php"
+    payload = {
+        "a": "GetYDTP_WXHJ_His",
+        "apiv": "w38",
+        "c": "StockBidYiDong",
+        "PhoneOSNew": "1",
+        "UserID": USER_ID,
+        "DeviceID": DEVICE_ID,
+        "VerSion": VERSION,
+        "Token": "0",
         "days": 30
     }
-    headers = {
-        "Accept": "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-    }
     try:
-        response = requests.get(url, params=params, headers=headers, timeout=30)
+        response = requests.post(url, data=payload, headers=headers, verify=False, timeout=30)
         response.raise_for_status()
         return response.json()
     except Exception as e:
