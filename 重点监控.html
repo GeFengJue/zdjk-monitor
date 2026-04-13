@@ -166,31 +166,40 @@
             return typeMap[type] || type;
         }
 
-        // 计算剩余天数
-        function getRemainingDays(endDateStr) {
+        // 获取今天的日期字符串
+        function getTodayStr() {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const endDate = new Date(endDateStr);
-            endDate.setHours(0, 0, 0, 0);
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
 
-            const diffTime = endDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // 计算剩余天数（用字符串比较避免时区问题）
+        function getRemainingDays(endDateStr) {
+            const todayStr = getTodayStr();
 
-            if (diffDays <= 0) {
+            if (endDateStr < todayStr) {
                 return '已解封';
-            } else if (diffDays === 1) {
+            } else if (endDateStr === todayStr) {
                 return '明日解封';
-            } else if (diffDays === 2) {
-                return '还剩1天解封';
             } else {
-                return `还剩${diffDays - 1}天解封`;
+                // 计算差几天
+                const [ey, em, ed] = endDateStr.split('-').map(Number);
+                const [ty, tm, td] = todayStr.split('-').map(Number);
+                const endDateObj = new Date(ey, em - 1, ed);
+                const todayObj = new Date(ty, tm - 1, td);
+                const diffDays = Math.ceil((endDateObj - todayObj) / (1000 * 60 * 60 * 24));
+                if (diffDays === 1) {
+                    return '明日解封';
+                } else if (diffDays === 2) {
+                    return '还剩1天解封';
+                } else {
+                    return `还剩${diffDays - 1}天解封`;
+                }
             }
         }
 
-        // 判断是否已解封（到期日 < 今天才算解封，当天到期不算）
+        // 判断是否已解封（到期日 < 今天才算解封）
         function isUnlocked(endDateStr) {
-            const today = new Date();
-            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const todayStr = getTodayStr();
             return endDateStr < todayStr;
         }
 
