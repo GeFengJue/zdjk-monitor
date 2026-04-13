@@ -187,9 +187,26 @@
             }
         }
 
+        // 判断是否已解封
+        function isUnlocked(endDateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const endDate = new Date(endDateStr);
+            endDate.setHours(0, 0, 0, 0);
+            return endDate <= today;
+        }
+
         // 格式化结束日期（带剩余天数）
         function formatEndDate(endDateStr) {
             return `${endDateStr}(${getRemainingDays(endDateStr)})`;
+        }
+
+        // 格式化股票名称（加粗+删除线）
+        function formatStockName(name, endDateStr) {
+            if (isUnlocked(endDateStr)) {
+                return `<s>${name}</s>`;
+            }
+            return `<strong>${name}</strong>`;
         }
 
         // 获取函件类型名称
@@ -213,7 +230,7 @@
             tbody.innerHTML = data.map(item => {
                 const cells = columns.map(col => {
                     if (col.format) {
-                        return `<td>${col.format(item[col.index])}</td>`;
+                        return `<td>${col.format(item[col.index], item)}</td>`;
                     }
                     return `<td>${item[col.index] || '-'}</td>`;
                 }).join('');
@@ -231,7 +248,7 @@
                 // 填充重点监控(今日)
                 fillTable('today-table', data.ZDJK_Today?.List || [], [
                     { index: 0 },
-                    { index: 1 },
+                    { index: 1, format: (v, row) => formatStockName(v, row[3]) },
                     { index: 2 },
                     { index: 3, format: v => formatEndDate(v) },
                     { index: 4, format: v => getTypeName(v) }
@@ -240,7 +257,7 @@
                 // 填充历史监管
                 fillTable('history-table', data.ZDJK_His?.List || [], [
                     { index: 0 },
-                    { index: 1 },
+                    { index: 1, format: (v, row) => formatStockName(v, row[3]) },
                     { index: 2 },
                     { index: 3, format: v => formatEndDate(v) },
                     { index: 4, format: v => getTypeName(v) }
