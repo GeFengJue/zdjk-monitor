@@ -166,6 +166,32 @@
             return typeMap[type] || type;
         }
 
+        // 计算剩余天数
+        function getRemainingDays(endDateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const endDate = new Date(endDateStr);
+            endDate.setHours(0, 0, 0, 0);
+
+            const diffTime = endDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                return '已解封';
+            } else if (diffDays === 0) {
+                return '明日解封';
+            } else if (diffDays === 1) {
+                return '还剩1天解封';
+            } else {
+                return `还剩${diffDays}天解封`;
+            }
+        }
+
+        // 格式化结束日期（带剩余天数）
+        function formatEndDate(endDateStr) {
+            return `${endDateStr}(${getRemainingDays(endDateStr)})`;
+        }
+
         // 获取函件类型名称
         function getLetterType(type) {
             const typeMap = {
@@ -207,7 +233,7 @@
                     { index: 0 },
                     { index: 1 },
                     { index: 2 },
-                    { index: 3 },
+                    { index: 3, format: v => formatEndDate(v) },
                     { index: 4, format: v => getTypeName(v) }
                 ]);
 
@@ -216,7 +242,7 @@
                     { index: 0 },
                     { index: 1 },
                     { index: 2 },
-                    { index: 3 },
+                    { index: 3, format: v => formatEndDate(v) },
                     { index: 4, format: v => getTypeName(v) }
                 ]);
 
